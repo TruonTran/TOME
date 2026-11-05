@@ -36,14 +36,6 @@ apps/
     components/PdfReader      react-pdf (pdf.js), phím mũi tên để lật trang
     components/DocxReader     HTML đã convert, chỉnh cỡ chữ + nền sáng/sepia/tối
 ```
-
-## Luồng upload
-
-1. Web gửi file lên `POST /books` → API kiểm tra đuôi file và magic bytes, lưu vào `apps/api/storage/uploads`, tạo `Book(status=PROCESSING)`.
-2. API đẩy job vào hàng đợi `books` (Redis).
-3. Worker lấy job: PDF thì đếm trang, DOCX thì convert bằng `mammoth` rồi làm sạch HTML bằng `sanitize-html`. Xong thì `status=READY` (lỗi 3 lần thì `FAILED`).
-4. Trang chủ tự hỏi lại API mỗi 2 giây khi còn sách đang xử lý.
-
 ## API
 
 | Method | Đường dẫn | Mô tả |
@@ -56,16 +48,3 @@ apps/
 | PUT | `/books/:id/progress` | `{ page, percent }` |
 | POST | `/sessions` | `{ bookId, seconds, pages, day }` |
 | GET | `/stats?today=YYYY-MM-DD` | phút đọc hôm nay, streak, 7 ngày, số sách đã xong |
-
-## Những chỗ nên tự đọc kỹ để học
-
-- **Redis có 3 vai trò**: hàng đợi BullMQ, đếm giới hạn đăng nhập (`auth.controller.ts`), cache thống kê 60 giây và xoá khi có phiên đọc mới (`reading.service.ts`).
-- **Streak** tính từ cột `day` (ngày địa phương do client gửi), nên server không cần xử lý múi giờ.
-- **Tiến độ DOCX** lưu theo phần trăm cuộn trang, **PDF** lưu theo số trang.
-- Cookie đăng nhập là `sameSite=lax`, chạy được vì web và API cùng host `localhost` (khác cổng). Khi deploy lên hai domain khác nhau, cần đặt chung domain cha (vd. `app.` và `api.`) hoặc đổi cách xác thực.
-
-## Chưa làm (gợi ý bước tiếp theo)
-
-- Highlight và ghi chú trong sách, tìm kiếm trong sách (Postgres full-text).
-- Ảnh bìa thật từ trang đầu PDF (hiện bìa được sinh tự động theo tên sách).
-- Nhắc đọc hằng ngày, lưu file lên S3/R2/MinIO thay vì ổ đĩa, tách worker ra tiến trình riêng, viết test, Dockerfile để deploy.

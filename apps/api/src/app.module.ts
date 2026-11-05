@@ -6,18 +6,14 @@ import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import { BooksModule } from './books/books.module';
 import { ReadingModule } from './reading/reading.module';
+import { redisOptions } from './redis/redis.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get('REDIS_HOST', 'localhost'),
-          port: Number(config.get('REDIS_PORT', 6379)),
-        },
-      }),
+      useFactory: (config: ConfigService) => ({ connection: redisOptions(config) }),
     }),
     PrismaModule,
     RedisModule,

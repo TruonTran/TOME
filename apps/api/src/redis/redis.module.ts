@@ -1,6 +1,7 @@
 import { Global, Inject, Module, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import { redisOptions } from './redis.config';
 
 export const REDIS = 'REDIS';
 
@@ -10,11 +11,7 @@ export const REDIS = 'REDIS';
     {
       provide: REDIS,
       inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        new Redis({
-          host: config.get('REDIS_HOST', 'localhost'),
-          port: Number(config.get('REDIS_PORT', 6379)),
-        }),
+      useFactory: (config: ConfigService) => new Redis(redisOptions(config)),
     },
   ],
   exports: [REDIS],

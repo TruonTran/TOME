@@ -18,6 +18,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       maxAge: COOKIE_MAX_AGE_MS,
       path: '/',
+      domain: process.env.COOKIE_DOMAIN || undefined, // vd. .tome.vn để web và api chung cookie
     });
   }
 
@@ -47,7 +48,7 @@ export class AuthController {
 
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie(COOKIE_NAME, { path: '/' });
+    res.clearCookie(COOKIE_NAME, { path: '/', domain: process.env.COOKIE_DOMAIN || undefined });
     return { ok: true };
   }
 

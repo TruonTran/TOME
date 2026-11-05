@@ -6,6 +6,8 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // sau proxy của Railway/Nginx: lấy IP thật của người dùng (để giới hạn đăng nhập đúng người)
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.enableCors({
