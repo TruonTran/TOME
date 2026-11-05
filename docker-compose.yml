@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tome
+      POSTGRES_PASSWORD: tome
+      POSTGRES_DB: tome
+    ports:
+      - "5432:5432"
+    volumes:
+      # Postgres 18+: mount ở /var/lib/postgresql (không phải .../data như bản cũ)
+      - pgdata:/var/lib/postgresql
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  redisdata:

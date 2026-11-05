@@ -1,0 +1,13 @@
+{
+  "name": "tome",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "db:migrate": "npm run prisma:migrate -w apps/api",
+    "db:studio": "npm run prisma:studio -w apps/api",
+    "dev:api": "npm run start:dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web"
+  }
+}

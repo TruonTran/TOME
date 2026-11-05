@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookFormat {
+  PDF
+  DOCX
+}
+
+enum BookStatus {
+  PROCESSING
+  READY
+  FAILED
+}
+
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  name             String?
+  passwordHash     String
+  dailyGoalMinutes Int              @default(20)
+  createdAt        DateTime         @default(now())
+  books            Book[]
+  sessions         ReadingSession[]
+}
+
+model Book {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  author       String?
+  format       BookFormat
+  originalName String
+  filePath     String
+  htmlPath     String?
+  totalPages   Int?
+  wordCount    Int?
+  status       BookStatus       @default(PROCESSING)
+  error        String?
+  page         Int              @default(1)
+  percent      Float            @default(0)
+  lastReadAt   DateTime?
+  finishedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  sessions     ReadingSession[]
+
+  @@index([userId, lastReadAt])
+}
+
+// Mỗi lần đọc = 1 dòng. `day` là ngày địa phương của người dùng (YYYY-MM-DD)
+// do client gửi lên, để tính streak mà không phải xử lý múi giờ ở server.
+model ReadingSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  seconds   Int
+  pages     Int      @default(0)
+  day       String
+  createdAt DateTime @default(now())
+
+  @@index([userId, day])
+}
